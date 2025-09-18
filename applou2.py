@@ -9,17 +9,46 @@ from fpdf import FPDF
 from io import BytesIO
 import os
 import stripe
+import pyrebase
 
-stripe.api_key =st.secrets["stripe_secret_key"]
-# --- CONFIGURACIÓN GENERAL ---
-st.set_page_config(page_title="Evaluación AI + Imagen", layout="wide")
+firebaseConfig = {
+    "apiKey": st.secrets["firebase"]["apiKey"],
+    "authDomain": st.secrets["firebase"]["authDomain"],
+    "projectId": st.secrets["firebase"]["projectId"],
+    "storageBucket": st.secrets["firebase"]["storageBucket"],
+    "messagingSenderId": st.secrets["firebase"]["messagingSenderId"],
+    "appId": st.secrets["firebase"]["appId"]
+}
 
-st.write("Stripe OK") if stripe.api_key else st.warning("Stripe NO cargó")
+firebase = pyrebase.initialize_app(firebaseConfig)
+auth = firebase.auth()
 
-# --- AUTENTICACIÓN SIMPLE ---
-clave = st.text_input("Ingresa  clave de acceso:", type="password")
-if clave != "lourdeswalls":
-    st.warning("Clave incorrecta.")
+
+st.markdown("## Iniciar sesión o registrarse")
+
+opcion = st.radio("¿Tienes cuenta?", ["Iniciar sesión", "Registrarse"])
+
+email = st.text_input("Correo")
+password = st.text_input("Contraseña", type="password")
+
+if opcion == "Registrarse":
+    if st.button("Crear cuenta"):
+        try:
+            user = auth.create_user_with_email_and_password(email, password)
+            st.success("Cuenta creada. Ahora inicia sesión.")
+        except Exception as e:
+            st.error("Error: " + str(e))
+elif opcion == "Iniciar sesión":
+    if st.button("Entrar"):
+        try:
+            user = auth.sign_in_with_email_and_password(email, password)
+            st.success("Sesión iniciada.")
+            st.session_state["user"] = user
+        except Exception as e:
+            st.error("Error: " + str(e))
+
+if "user" not in st.session_state:
+    st.warning("Por favor inicia sesión para acceder a la herramienta.")
     st.stop()
 
 # --- HEADER ---
