@@ -7,3 +7,4 @@ stripe
 python-dotenv
 pyrebase4
 Pillow
+google-cloud-storage
