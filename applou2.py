@@ -9,7 +9,8 @@ from fpdf import FPDF
 from io import BytesIO
 import os
 import stripe
-import pyrebase
+from pyrebase import pyrebase as pb
+firebase = pb.initialize_app(firebaseConfig)
 
 firebaseConfig = {
     "apiKey": st.secrets["firebase"]["apiKey"],
