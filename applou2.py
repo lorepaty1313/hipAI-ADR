@@ -74,6 +74,7 @@ if "user" not in st.session_state:
     st.warning("Por favor inicia sesión para acceder a la herramienta.")
     st.stop()
 else:
+    pass
     # Aquí empieza el contenido de tu app protegida
 # --- HEADER ---
 st.markdown(
