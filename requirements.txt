@@ -5,3 +5,5 @@ scipy
 fpdf
 stripe 
 python-dotenv
+pyrebase4
+Pillow
