@@ -7,4 +7,5 @@ stripe
 python-dotenv
 pyrebase4
 Pillow
+firebase_admin
 
