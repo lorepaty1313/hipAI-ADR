@@ -1,4 +1,26 @@
+import streamlit as st
+import firebase_admin
+from firebase_admin import credentials, firestore
+from datetime import datetime
 
+# --- Inicializa Firebase Admin ---
+if not firebase_admin._apps:
+    cred = credentials.Certificate({
+        key: value.replace('\\n', '\n') if isinstance(value, str) else value
+        for key, value in st.secrets["firebase_admin"].items()
+    })
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
+# 🔽 BLOQUE DE PRUEBA 🔽
+email = st.text_input("Correo (para prueba)")
+if st.button("Guardar acceso de prueba"):
+    db.collection("usuarios").document(email.replace("@", "_").replace(".", "_")).set({
+        "email": email,
+        "ultimo_acceso": datetime.utcnow()
+    }, merge=True)
+    st.success("Guardado correctamente en Firestore.")
 
 import streamlit as st
 import numpy as np
