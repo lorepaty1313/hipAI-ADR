@@ -8,6 +8,7 @@ import scipy.stats as stats
 from fpdf import FPDF
 from io import BytesIO
 import os
+import stripe
 
 stripe.api_key =st.secrets["stripe_secret_key"]
 # --- CONFIGURACIÓN GENERAL ---
