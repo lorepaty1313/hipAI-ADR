@@ -9,20 +9,31 @@ from fpdf import FPDF
 from io import BytesIO
 import os
 import stripe
-from pyrebase import pyrebase as pb
-firebase = pb.initialize_app(firebaseConfig)
 
-firebaseConfig = {
-    "apiKey": st.secrets["firebase"]["apiKey"],
-    "authDomain": st.secrets["firebase"]["authDomain"],
-    "projectId": st.secrets["firebase"]["projectId"],
-    "storageBucket": st.secrets["firebase"]["storageBucket"],
-    "messagingSenderId": st.secrets["firebase"]["messagingSenderId"],
-    "appId": st.secrets["firebase"]["appId"]
-}
+import firebase_admin
+from firebase_admin import credentials, firestore
 
-firebase = pyrebase.initialize_app(firebaseConfig)
-auth = firebase.auth()
+# Inicializar Firebase solo una vez
+if not firebase_admin._apps:
+    cred = credentials.Certificate({
+        "type": "service_account",
+        "project_id": st.secrets["firebase"]["projectId"],
+        "private_key_id": st.secrets["firebase"]["private_key_id"],
+        "private_key": st.secrets["firebase"]["private_key"].replace('\\n', '\n'),
+        "client_email": st.secrets["firebase"]["client_email"],
+        "client_id": st.secrets["firebase"]["client_id"],
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": st.secrets["firebase"]["client_x509_cert_url"]
+    })
+    firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+db.collection("usuarios").document(email).set({
+    "email": email,
+    "ultimo_acceso": datetime.utcnow()
+})
 from datetime import datetime
 import requests
 
