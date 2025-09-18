@@ -9,6 +9,7 @@ from fpdf import FPDF
 from io import BytesIO
 import os
 
+stripe.api_key =st.secrets["stripe_secret_key"]
 # --- CONFIGURACIÓN GENERAL ---
 st.set_page_config(page_title="Evaluación AI + Imagen", layout="wide")
 
