@@ -3,3 +3,5 @@ numpy
 matplotlib
 scipy
 fpdf
+stripe 
+python-dotenv
