@@ -22,7 +22,22 @@ firebaseConfig = {
 
 firebase = pyrebase.initialize_app(firebaseConfig)
 auth = firebase.auth()
+from datetime import datetime
+import requests
 
+def guardar_acceso(email, id_token):
+    url = f"https://firestore.googleapis.com/v1/projects/{st.secrets['firebase']['projectId']}/databases/(default)/documents/usuarios/{email.replace('@', '_').replace('.', '_')}"
+    headers = {
+        "Authorization": f"Bearer {id_token}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "fields": {
+            "email": {"stringValue": email},
+            "ultimo_acceso": {"timestampValue": datetime.utcnow().isoformat() + "Z"}
+        }
+    }
+    requests.patch(url, headers=headers, json=data)
 
 st.markdown("## Iniciar sesión o registrarse")
 
@@ -44,6 +59,7 @@ elif opcion == "Iniciar sesión":
             user = auth.sign_in_with_email_and_password(email, password)
             st.success("Sesión iniciada.")
             st.session_state["user"] = user
+            guardar_acceso(email, user['idToken'])  # <-- AQUÍ guardas en Firestore
         except Exception as e:
             st.error("Error: " + str(e))
 
