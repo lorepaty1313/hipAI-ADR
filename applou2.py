@@ -59,6 +59,13 @@ elif opcion == "Iniciar sesión":
             user = auth.sign_in_with_email_and_password(email, password)
             st.success("Sesión iniciada.")
             st.session_state["user"] = user
+            st.success(f"Sesión iniciada con: {user['email']}")
+            if st.button("Cerrar sesión"):
+                del st.session_state["user"]
+                st.experimental_rerun()
+
+
+            
             guardar_acceso(email, user['idToken'])  # <-- AQUÍ guardas en Firestore
         except Exception as e:
             st.error("Error: " + str(e))
@@ -66,7 +73,8 @@ elif opcion == "Iniciar sesión":
 if "user" not in st.session_state:
     st.warning("Por favor inicia sesión para acceder a la herramienta.")
     st.stop()
-
+else:
+    # Aquí empieza el contenido de tu app protegida
 # --- HEADER ---
 st.markdown(
     """
