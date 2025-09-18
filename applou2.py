@@ -13,6 +13,8 @@ stripe.api_key =st.secrets["stripe_secret_key"]
 # --- CONFIGURACIÓN GENERAL ---
 st.set_page_config(page_title="Evaluación AI + Imagen", layout="wide")
 
+st.write("Stripe OK") if stripe.api_key else st.warning("Stripe NO cargó")
+
 # --- AUTENTICACIÓN SIMPLE ---
 clave = st.text_input("Ingresa  clave de acceso:", type="password")
 if clave != "lourdeswalls":
