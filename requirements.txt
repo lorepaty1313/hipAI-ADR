@@ -3,8 +3,10 @@ numpy
 matplotlib
 scipy
 fpdf
-stripe 
+stripe
 python-dotenv
 pyrebase4
 Pillow
 firebase-admin
+# no glcoud
+gcloud==0.0.0
