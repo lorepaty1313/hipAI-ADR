@@ -99,8 +99,8 @@ elif "stripe_pagado" not in st.session_state:
     import stripe
     stripe.api_key = st.secrets["stripe"]["secret_key"]
 
-    st.markdown("## Pago por acceso 🧾")
-    st.info("El acceso completo cuesta **$199 MXN** (ejemplo).")
+    st.markdown("## Suscribete aqui 🧾")
+    st.info("El acceso cuesta 50 MXN al mes).")
 
     if st.button("Pagar ahora"):
         try:
