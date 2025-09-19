@@ -105,20 +105,13 @@ elif "stripe_pagado" not in st.session_state:
     if st.button("Pagar ahora"):
         try:
             checkout_session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
                 line_items=[
-                    {
-                        "price_data": {
-                            "currency": "mxn",
-                            "product_data": {
-                                "name": "Acceso a la app de evaluación de caderas",
-                            },
-                            "unit_amount": 19900,  # $199.00 MXN
-                        },
-                        "quantity": 1,
-                    },
-                ],
-                mode="payment",
+        {
+            "price": "price_1Ryfu1HAIkcyYR9hory1u55D",  # 👈 aquí va tu price_id
+            "quantity": 1,
+        },
+    ],
+    mode="subscription", 
                 success_url=st.secrets["app"]["url"] + "?pago=exitoso",
                 cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
             )
