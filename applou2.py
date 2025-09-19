@@ -104,30 +104,30 @@ elif "stripe_pagado" not in st.session_state:
 
     if st.button("Pagar ahora"):
         try:
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=["card"],
-        line_items=[
-            {
-                "price_data": {
-                    "currency": "mxn",
-                    "product_data": {
-                        "name": "Acceso a la app de evaluación de caderas",
+            checkout_session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=[
+                    {
+                        "price_data": {
+                            "currency": "mxn",
+                            "product_data": {
+                                "name": "Acceso a la app de evaluación de caderas",
+                            },
+                            "unit_amount": 19900,  # $199.00 MXN
+                        },
+                        "quantity": 1,
                     },
-                    "unit_amount": 19900,  # $199.00 MXN
-                },
-                "quantity": 1,
-            },
-        ],
-        mode="payment",
-        success_url=st.secrets["app"]["url"] + "?pago=exitoso",
-        cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
-    )
-    st.write("Redireccionando a Stripe...")
-    st.markdown(f"[Haz clic aquí para pagar]({checkout_session.url})", unsafe_allow_html=True)
-
-except Exception as e:
-    st.error(f"❌ Error al crear sesión de pago: {e}")
-# --- HEADER ---
+                ],
+                mode="payment",
+                success_url=st.secrets["app"]["url"] + "?pago=exitoso",
+                cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
+            )
+            st.write("Redireccionando a Stripe...")
+            st.markdown(f"[Haz clic aquí para pagar]({checkout_session.url})", unsafe_allow_html=True)
+        
+        except Exception as e:
+            st.error(f"❌ Error al crear sesión de pago: {e}")
+        # --- HEADER ---
 st.markdown(
     """
     <div style='text-align: right;'>
