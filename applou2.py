@@ -2,6 +2,7 @@ import streamlit as st
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
+import pyrebase
 import requests
 
 # --- Inicializa Firebase Admin UNA SOLA VEZ ---
@@ -14,11 +15,24 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
+# --- Inicializa Pyrebase para autenticación ---
+firebase_config = {
+    "apiKey": st.secrets["firebase_config"]["apiKey"],
+    "authDomain": st.secrets["firebase_config"]["authDomain"],
+    "projectId": st.secrets["firebase_config"]["projectId"],
+    "storageBucket": st.secrets["firebase_config"]["storageBucket"],
+    "messagingSenderId": st.secrets["firebase_config"]["messagingSenderId"],
+    "appId": st.secrets["firebase_config"]["appId"],
+    "measurementId": st.secrets["firebase_config"]["measurementId"]
+}
+
+firebase = pyrebase.initialize_app(firebase_config)
+auth = firebase.auth()
+
 # --- FUNCIÓN: Guardar acceso en Firestore ---
 def guardar_acceso(email, id_token=None):
     doc_id = email.replace("@", "_").replace(".", "_")
     
-    # Si tenemos el id_token (desde login con pyrebase), lo usamos para autenticación REST
     if id_token:
         url = f"https://firestore.googleapis.com/v1/projects/{st.secrets['firebase_admin']['project_id']}/databases/(default)/documents/usuarios/{doc_id}"
         headers = {
@@ -33,7 +47,6 @@ def guardar_acceso(email, id_token=None):
         }
         requests.patch(url, headers=headers, json=data)
     else:
-        # Si no hay token, usamos Firebase Admin directamente
         db.collection("usuarios").document(doc_id).set({
             "email": email,
             "ultimo_acceso": datetime.utcnow()
@@ -43,24 +56,9 @@ def guardar_acceso(email, id_token=None):
 st.markdown("## Iniciar sesión o registrarse")
 
 opcion = st.radio("¿Tienes cuenta?", ["Iniciar sesión", "Registrarse"])
-
 email = st.text_input("Correo")
 password = st.text_input("Contraseña", type="password")
 
-# 🔐 Autenticación con Pyrebase (usa pyrebase4 en requirements.txt)
-
-[firebase_config]
-apiKey = "AIzaSyC_m-FmXuJajmAlbYwbv5nkg1qc3VDpSbg"
-authDomain = "the-hip-app.firebaseapp.com"
-projectId = "the-hip-app"
-storageBucket = "the-hip-app.appspot.com"
-messagingSenderId = "718091850818"
-appId = "1:718091850818:web:c455e6154cc0aeed8889db"
-measurementId = "G-X8BZ3JL481"
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-
-# --- Registro o Login ---
 if opcion == "Registrarse":
     if st.button("Crear cuenta"):
         try:
@@ -75,13 +73,10 @@ elif opcion == "Iniciar sesión":
             user = auth.sign_in_with_email_and_password(email, password)
             st.success(f"Sesión iniciada con: {user['email']}")
             st.session_state["user"] = user
-            
-            guardar_acceso(email, user['idToken'])  # Guarda acceso en Firestore
-
+            guardar_acceso(email, user['idToken'])  # Guarda acceso
             if st.button("Cerrar sesión"):
                 del st.session_state["user"]
                 st.experimental_rerun()
-
         except Exception as e:
             st.error("Error: " + str(e))
 
@@ -91,7 +86,7 @@ if "user" not in st.session_state:
     st.stop()
 else:
     st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
-    # Aquí empieza el contenido de tu app protegida
+
 # --- HEADER ---
 st.markdown(
     """
