@@ -1,11 +1,10 @@
 import streamlit as st
+import requests
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
-import pyrebase
-import requests
 
-# --- Inicializa Firebase Admin UNA SOLA VEZ ---
+# --- Firebase Admin Init ---
 if not firebase_admin._apps:
     cred = credentials.Certificate({
         key: value.replace('\\n', '\n') if isinstance(value, str) else value
@@ -15,44 +14,44 @@ if not firebase_admin._apps:
 
 db = firestore.client()
 
-# --- Inicializa Pyrebase para autenticación ---
-firebase_config = {
-    "apiKey": st.secrets["firebase_config"]["apiKey"],
-    "authDomain": st.secrets["firebase_config"]["authDomain"],
-    "projectId": st.secrets["firebase_config"]["projectId"],
-    "storageBucket": st.secrets["firebase_config"]["storageBucket"],
-    "messagingSenderId": st.secrets["firebase_config"]["messagingSenderId"],
-    "appId": st.secrets["firebase_config"]["appId"],
-    "measurementId": st.secrets["firebase_config"]["measurementId"]
-}
-
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-
-# --- FUNCIÓN: Guardar acceso en Firestore ---
-def guardar_acceso(email, id_token=None):
+# --- Función para guardar acceso en Firestore ---
+def guardar_acceso(email):
     doc_id = email.replace("@", "_").replace(".", "_")
-    
-    if id_token:
-        url = f"https://firestore.googleapis.com/v1/projects/{st.secrets['firebase_admin']['project_id']}/databases/(default)/documents/usuarios/{doc_id}"
-        headers = {
-            "Authorization": f"Bearer {id_token}",
-            "Content-Type": "application/json"
-        }
-        data = {
-            "fields": {
-                "email": {"stringValue": email},
-                "ultimo_acceso": {"timestampValue": datetime.utcnow().isoformat() + "Z"}
-            }
-        }
-        requests.patch(url, headers=headers, json=data)
-    else:
-        db.collection("usuarios").document(doc_id).set({
-            "email": email,
-            "ultimo_acceso": datetime.utcnow()
-        }, merge=True)
+    db.collection("usuarios").document(doc_id).set({
+        "email": email,
+        "ultimo_acceso": datetime.utcnow()
+    }, merge=True)
 
-# --- INTERFAZ DE AUTENTICACIÓN ---
+# --- Autenticación con REST ---
+def firebase_login(email, password):
+    api_key = st.secrets["firebase_rest"]["apiKey"]
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={api_key}"
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    if r.status_code == 200:
+        return r.json()
+    else:
+        raise Exception(r.json()["error"]["message"])
+
+def firebase_register(email, password):
+    api_key = st.secrets["firebase_rest"]["apiKey"]
+    url = f"https://identitytoolkit.googleapis.com/v1/accounts:signUp?key={api_key}"
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    if r.status_code == 200:
+        return r.json()
+    else:
+        raise Exception(r.json()["error"]["message"])
+
+# --- UI de autenticación ---
 st.markdown("## Iniciar sesión o registrarse")
 
 opcion = st.radio("¿Tienes cuenta?", ["Iniciar sesión", "Registrarse"])
@@ -62,30 +61,27 @@ password = st.text_input("Contraseña", type="password")
 if opcion == "Registrarse":
     if st.button("Crear cuenta"):
         try:
-            user = auth.create_user_with_email_and_password(email, password)
+            user = firebase_register(email, password)
             st.success("Cuenta creada. Ahora inicia sesión.")
         except Exception as e:
-            st.error("Error: " + str(e))
+            st.error(f"Error: {e}")
 
 elif opcion == "Iniciar sesión":
     if st.button("Entrar"):
         try:
-            user = auth.sign_in_with_email_and_password(email, password)
-            st.success(f"Sesión iniciada con: {user['email']}")
+            user = firebase_login(email, password)
             st.session_state["user"] = user
-            guardar_acceso(email, user['idToken'])  # Guarda acceso
-            if st.button("Cerrar sesión"):
-                del st.session_state["user"]
-                st.experimental_rerun()
+            st.success(f"Sesión iniciada con: {user['email']}")
+            guardar_acceso(email)
         except Exception as e:
-            st.error("Error: " + str(e))
+            st.error(f"Error: {e}")
 
-# --- VERIFICAR AUTENTICACIÓN ---
 if "user" not in st.session_state:
-    st.warning("Por favor inicia sesión para acceder a la herramienta.")
+    st.warning("Por favor inicia sesión para continuar.")
     st.stop()
-else:
-    st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
+
+# --- CONTENIDO PROTEGIDO ---
+st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
 
 # --- HEADER ---
 st.markdown(
