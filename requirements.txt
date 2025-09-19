@@ -6,6 +6,7 @@ fpdf
 stripe
 python-dotenv
 pyrebase4
+google-cloud-storage
 Pillow
 firebase_admin
 
