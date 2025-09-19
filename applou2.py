@@ -88,42 +88,42 @@ if "user" not in st.session_state:
     st.stop()
 
 # --- CONTENIDO PROTEGIDO ---
-    else
-        st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
-        if st.query_params.get("pago") == "exitoso":
-            st.session_state["stripe_pagado"] = True
-            st.success("✅ ¡Pago recibido con éxito! Puedes usar la app.")
-        elif "stripe_pagado" not in st.session_state:
-            import stripe
-            stripe.api_key = st.secrets["stripe"]["secret_key"]
+st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
 
-            st.markdown("## Pago por acceso 🧾")
-            st.info("El acceso completo cuesta **$199 MXN** (ejemplo).")
-    
-            if st.button("Pagar ahora"):
-                checkout_session = stripe.checkout.Session.create(
-                    payment_method_types=["card"],
-                    line_items=[
-                        {
-                            "price_data": {
-                                "currency": "mxn",
-                                "product_data": {
-                                    "name": "Acceso a la app de evaluación de caderas",
-                                },
-                                "unit_amount": 19900,
-                            },
-                            "quantity": 1,
+# 🔐 VERIFICACIÓN DE PAGO
+if st.query_params.get("pago") == "exitoso":
+    st.session_state["stripe_pagado"] = True
+    st.success("✅ ¡Pago recibido con éxito! Puedes usar la app.")
+elif "stripe_pagado" not in st.session_state:
+    import stripe
+    stripe.api_key = st.secrets["stripe"]["secret_key"]
+
+    st.markdown("## Pago por acceso 🧾")
+    st.info("El acceso completo cuesta **$199 MXN** (ejemplo).")
+
+    if st.button("Pagar ahora"):
+        checkout_session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "mxn",
+                        "product_data": {
+                            "name": "Acceso a la app de evaluación de caderas",
                         },
-                    ],
-                    mode="payment",
-                    success_url=st.secrets["app"]["url"] + "?pago=exitoso",
-                    cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
-                )
-                st.write("Redireccionando a Stripe...")
-                st.markdown(f"[Haz clic aquí para pagar]({checkout_session.url})", unsafe_allow_html=True)
-    
-            st.stop()  # ⛔ Detiene la app hasta que pague
+                        "unit_amount": 19900,  # en centavos: $199.00 MXN
+                    },
+                    "quantity": 1,
+                },
+            ],
+            mode="payment",
+            success_url=st.secrets["app"]["url"] + "?pago=exitoso",
+            cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
+        )
+        st.write("Redireccionando a Stripe...")
+        st.markdown(f"[Haz clic aquí para pagar]({checkout_session.url})", unsafe_allow_html=True)
 
+    st.stop()
 
 # --- HEADER ---
 st.markdown(
