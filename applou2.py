@@ -130,7 +130,7 @@ st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
 # 🔐 VERIFICACIÓN DE PAGO CON STRIPE
 if st.query_params.get("pago") == "exitoso":
     st.session_state["stripe_pagado"] = True
-    st.success("✅ ¡Pago recibido con éxito! Puedes usar la app.")
+    st.success("Es un gusto tenerte de vuelta.")
 elif "stripe_pagado" not in st.session_state:
     import stripe
     stripe.api_key = st.secrets["stripe"]["secret_key"]
