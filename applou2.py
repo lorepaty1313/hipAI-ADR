@@ -3,7 +3,14 @@ import requests
 from datetime import datetime
 import firebase_admin
 from firebase_admin import credentials, firestore
-
+#lo viejo
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.image as mpimg
+import scipy.stats as stats
+from fpdf import FPDF
+from io import BytesIO
+import os
 # --- Firebase Admin Init ---
 if not firebase_admin._apps:
     cred = credentials.Certificate({
