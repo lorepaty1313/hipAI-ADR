@@ -83,6 +83,7 @@ elif opcion == "Iniciar sesión":
         except Exception as e:
             st.error(f"Error: {e}")
 
+# --- VERIFICA QUE EL USUARIO ESTÉ LOGUEADO ---
 if "user" not in st.session_state:
     st.warning("Por favor inicia sesión para continuar.")
     st.stop()
@@ -90,7 +91,7 @@ if "user" not in st.session_state:
 # --- CONTENIDO PROTEGIDO ---
 st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
 
-# 🔐 VERIFICACIÓN DE PAGO
+# 🔐 VERIFICACIÓN DE PAGO CON STRIPE
 if st.query_params.get("pago") == "exitoso":
     st.session_state["stripe_pagado"] = True
     st.success("✅ ¡Pago recibido con éxito! Puedes usar la app.")
@@ -111,7 +112,7 @@ elif "stripe_pagado" not in st.session_state:
                         "product_data": {
                             "name": "Acceso a la app de evaluación de caderas",
                         },
-                        "unit_amount": 19900,  # en centavos: $199.00 MXN
+                        "unit_amount": 19900,
                     },
                     "quantity": 1,
                 },
