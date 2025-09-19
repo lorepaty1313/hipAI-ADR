@@ -22,6 +22,22 @@ if st.button("Guardar acceso de prueba"):
     }, merge=True)
     st.success("Guardado correctamente en Firestore.")
 
+from datetime import datetime
+
+def guardar_acceso(email):
+    db.collection("usuarios").document(email.replace("@", "_").replace(".", "_")).set({
+        "email": email,
+        "ultimo_acceso": datetime.utcnow()
+    }, merge=True)
+
+user = auth.sign_in_with_email_and_password(email, password)
+st.session_state["user"] = user
+guardar_acceso(email)
+
+if "stripe_pagado" not in st.session_state:
+    st.warning("Completa el pago para continuar")
+    st.stop()
+
 import streamlit as st
 import numpy as np
 import matplotlib.pyplot as plt
@@ -427,10 +443,10 @@ pdf.set_font("Arial", 'B', 11)
 pdf.cell(0, 10, "Valores de Índice Acetabular:", ln=True)
 
 pdf.set_font("Arial", '', 11)
-pdf.cell(95, 10, f"IA-S Derecha: {novais_der:.2f}°", ln=False)
-pdf.cell(95, 10, f"IA-S Izquierda: {novais_izq:.2f}°", ln=False)
-pdf.cell(95, 10, f"IA-L Derecha: {tonnis_der:.2f}°", ln=True)
-pdf.cell(95, 10, f"IA-L Izquierda: {tonnis_izq:.2f}°", ln=True)
+pdf.cell(100, 10, f"IA-S Derecha: {novais_der:.2f}°", ln=False)
+pdf.cell(100, 10, f"IA-S Izquierda: {novais_izq:.2f}°", ln=True)
+pdf.cell(100, 10, f"IA-L Derecha: {tonnis_der:.2f}°", ln=False)
+pdf.cell(100, 10, f"IA-L Izquierda: {tonnis_izq:.2f}°", ln=True)
 pdf.ln(5)
 
 # Insertar primera imagen (fig1)
