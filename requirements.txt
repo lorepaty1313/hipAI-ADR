@@ -1,12 +1,15 @@
+
 streamlit
-numpy
-matplotlib
-scipy
-fpdf
-stripe
-python-dotenv
 pyrebase4
 google-cloud-storage
-Pillow
-firebase_admin
+
+#numpy
+#matplotlib
+#scipy
+#fpdf
+# stripe
+#python-dotenv
+
+#Pillow
+#firebase_admin
 
