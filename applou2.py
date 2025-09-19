@@ -48,7 +48,6 @@ email = st.text_input("Correo")
 password = st.text_input("Contraseña", type="password")
 
 # 🔐 Autenticación con Pyrebase (usa pyrebase4 en requirements.txt)
-from pyrebase import pyrebase
 
 firebase_config = {
     "apiKey": st.secrets["firebase_config"]["apiKey"],
