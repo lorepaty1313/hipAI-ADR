@@ -84,12 +84,48 @@ elif opcion == "Iniciar sesión":
             st.error(f"Error: {e}")
 
 # --- VERIFICA QUE EL USUARIO ESTÉ LOGUEADO ---
+# --- VERIFICA QUE EL USUARIO ESTÉ LOGUEADO ---
 if "user" not in st.session_state:
     st.warning("Por favor inicia sesión para continuar.")
     st.stop()
 
-# --- CONTENIDO PROTEGIDO ---
+# --- VERIFICACIÓN DE PAGO ---
+if st.query_params.get("pago") == "exitoso":
+    st.session_state["stripe_pagado"] = True
+    st.success("✅ ¡Pago recibido con éxito! Puedes usar la app.")
+
+# --- SI NO HA PAGADO, MUESTRA OPCIÓN DE PAGO Y DETIENE LA APP ---
+if "stripe_pagado" not in st.session_state:
+    import stripe
+    stripe.api_key = st.secrets["stripe"]["secret_key"]
+
+    st.markdown("## Suscríbete aquí 🧾")
+    st.info("El acceso cuesta **50 MXN al mes**.")
+
+    if st.button("Pagar ahora"):
+        try:
+            checkout_session = stripe.checkout.Session.create(
+                line_items=[
+                    {
+                        "price": "price_1Ryfu1HAIkcyYR9hory1u55D",
+                        "quantity": 1,
+                    },
+                ],
+                mode="subscription",
+                success_url=st.secrets["app"]["url"] + "?pago=exitoso",
+                cancel_url=st.secrets["app"]["url"] + "?pago=cancelado",
+            )
+            st.write("Redireccionando a Stripe...")
+            st.markdown(f"[Haz clic aquí para pagar]({checkout_session.url})", unsafe_allow_html=True)
+        except Exception as e:
+            st.error(f"❌ Error al crear sesión de pago: {e}")
+    
+    st.stop()  # 👈 Esto detiene la app aquí si no ha pagado
+
+# --- CONTENIDO PROTEGIDO (AHORA SÍ) ---
 st.success("Bienvenida. Ya puedes continuar con la app. 🩺✨")
+
+# ... y sigue todo tu contenido: inputs, cálculos, gráficas, PDF ...
 
 # 🔐 VERIFICACIÓN DE PAGO CON STRIPE
 if st.query_params.get("pago") == "exitoso":
