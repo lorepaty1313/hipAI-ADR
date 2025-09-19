@@ -49,16 +49,14 @@ password = st.text_input("Contraseña", type="password")
 
 # 🔐 Autenticación con Pyrebase (usa pyrebase4 en requirements.txt)
 
-firebase_config = {
-    "apiKey": st.secrets["firebase_config"]["apiKey"],
-    "authDomain": st.secrets["firebase_config"]["authDomain"],
-    "databaseURL": st.secrets["firebase_config"]["databaseURL"],
-    "projectId": st.secrets["firebase_config"]["projectId"],
-    "storageBucket": st.secrets["firebase_config"]["storageBucket"],
-    "messagingSenderId": st.secrets["firebase_config"]["messagingSenderId"],
-    "appId": st.secrets["firebase_config"]["appId"],
-    "measurementId": st.secrets["firebase_config"]["measurementId"]
-}
+[firebase_config]
+apiKey = "AIzaSyC_m-FmXuJajmAlbYwbv5nkg1qc3VDpSbg"
+authDomain = "the-hip-app.firebaseapp.com"
+projectId = "the-hip-app"
+storageBucket = "the-hip-app.appspot.com"
+messagingSenderId = "718091850818"
+appId = "1:718091850818:web:c455e6154cc0aeed8889db"
+measurementId = "G-X8BZ3JL481"
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 
